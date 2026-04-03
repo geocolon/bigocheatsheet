@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Big O Notation Cheat Sheet — Interactive Complexity Guide</title>
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Interactive Big O Notation cheat sheet with D3.js visualizations. Compare time and space complexity of data structures and sorting algorithms." />
+  <meta name="keywords" content="Big O Notation, time complexity, space complexity, data structures, sorting algorithms, cheat sheet, computer science" />
+  <meta name="author" content="George — BlerdalertsCS" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://yourusername.github.io/big-o-cheatsheet/" />
+
+  <!-- Open Graph / Social -->
+  <meta property="og:title" content="Big O Notation Cheat Sheet — Interactive Complexity Guide" />
+  <meta property="og:description" content="Interactive D3.js visualization of Big O complexities for data structures and sorting algorithms." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://yourusername.github.io/big-o-cheatsheet/" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Big O Notation Cheat Sheet" />
+  <meta name="twitter:description" content="Interactive D3.js visualization of Big O complexities." />
+
+  <!-- Structured Data for SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Big O Notation Cheat Sheet",
+    "description": "Interactive Big O Notation cheat sheet with D3.js visualizations.",
+    "educationalLevel": "Intermediate",
+    "learningResourceType": "Reference"
+  }
+  </script>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <!-- Google Fonts — dyslexia-friendly -->
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ───────────────────────────────────────
+       CSS Custom Properties — Dark & Light
+    ─────────────────────────────────────── */
+    :root {
+      --transition-speed: 0.35s;
+    }
+
+    [data-theme="dark"] {
+      --bg-primary:    #0a0e17;
+      --bg-secondary:  #111827;
+      --bg-card:       #1a2233;
+      --bg-card-hover: #1f2b3f;
+      --text-primary:  #e2e8f0;
+      --text-secondary:#94a3b8;
+      --text-muted:    #64748b;
+      --accent-green:  #22c55e;
+      --accent-yellow: #eab308;
+      --accent-orange: #f97316;
+      --accent-red:    #ef4444;
+      --accent-cyan:   #06b6d4;
+      --accent-purple: #a78bfa;
+      --border-color:  #1e293b;
+      --glow-color:    rgba(6, 182, 212, 0.15);
+      --chart-grid:    #1e293b;
+      --badge-good:    rgba(34,197,94,0.15);
+      --badge-fair:    rgba(234,179,8,0.15);
+      --badge-bad:     rgba(239,68,68,0.15);
+      --shadow:        0 4px 24px rgba(0,0,0,0.4);
+      --nav-bg:        rgba(10,14,23,0.92);
+    }
+
+    [data-theme="light"] {
+      --bg-primary:    #f8fafc;
+      --bg-secondary:  #f1f5f9;
+      --bg-card:       #ffffff;
+      --bg-card-hover: #f1f5f9;
+      --text-primary:  #1e293b;
+      --text-secondary:#475569;
+      --text-muted:    #94a3b8;
+      --accent-green:  #16a34a;
+      --accent-yellow: #ca8a04;
+      --accent-orange: #ea580c;
+      --accent-red:    #dc2626;
+      --accent-cyan:   #0891b2;
+      --accent-purple: #7c3aed;
+      --border-color:  #e2e8f0;
+      --glow-color:    rgba(8, 145, 178, 0.08);
+      --chart-grid:    #e2e8f0;
+      --badge-good:    rgba(22,163,74,0.12);
+      --badge-fair:    rgba(202,138,4,0.12);
+      --badge-bad:     rgba(220,38,38,0.12);
+      --shadow:        0 4px 24px rgba(0,0,0,0.08);
+      --nav-bg:        rgba(248,250,252,0.92);
+    }
+
+    /* ───────────────────────────────────────
+       Global Styles — Dyslexia-Friendly
+    ─────────────────────────────────────── */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    body {
+      font-family: 'Lexend', sans-serif;
+      font-weight: 400;
+      line-height: 1.7;
+      letter-spacing: 0.02em;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      transition: background var(--transition-speed), color var(--transition-speed);
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, h5 {
+      font-family: 'Lexend', sans-serif;
+      font-weight: 600;
+      line-height: 1.3;
+      letter-spacing: 0.01em;
+    }
+
+    code, .mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.92em;
+    }
+
+    /* ───────────────────────────────────────
+       Animated Background Grid
+    ─────────────────────────────────────── */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background-image:
+        linear-gradient(var(--border-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.4;
+      animation: gridPulse 8s ease-in-out infinite;
+    }
+
+    @keyframes gridPulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.5; }
+    }
+
+    /* ───────────────────────────────────────
+       Navigation
+    ─────────────────────────────────────── */
+    .navbar-custom {
+      background: var(--nav-bg);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.75rem 0;
+      transition: background var(--transition-speed);
+    }
+
+    .navbar-custom .navbar-brand {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--accent-cyan);
+      letter-spacing: 0.05em;
+    }
+
+    .navbar-custom .nav-link {
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 0.95rem;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      transition: all 0.25s;
+    }
+
+    .navbar-custom .nav-link:hover,
+    .navbar-custom .nav-link.active {
+      color: var(--accent-cyan);
+      background: var(--glow-color);
+    }
+
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: all 0.3s;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 12px var(--glow-color);
+      transform: rotate(20deg);
+    }
+
+    /* ───────────────────────────────────────
+       Hero Section
+    ─────────────────────────────────────── */
+    .hero {
+      padding: 6rem 0 3rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 620px;
+      margin: 0 auto 2rem;
+      line-height: 1.8;
+    }
+
+    /* ───────────────────────────────────────
+       Entry Animations
+    ─────────────────────────────────────── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeUp 0.7s ease forwards;
+    }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stagger-1 { animation-delay: 0.1s; }
+    .stagger-2 { animation-delay: 0.2s; }
+    .stagger-3 { animation-delay: 0.35s; }
+    .stagger-4 { animation-delay: 0.5s; }
+    .stagger-5 { animation-delay: 0.65s; }
+
+    /* Scroll-triggered animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ───────────────────────────────────────
+       Section Styles
+    ─────────────────────────────────────── */
+    section {
+      padding: 3.5rem 0;
+    }
+
+    .section-title {
+      font-size: 1.6rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .section-title i {
+      color: var(--accent-cyan);
+      font-size: 1.4rem;
+    }
+
+    .section-subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+      line-height: 1.7;
+    }
+
+    /* ───────────────────────────────────────
+       D3 Chart Area
+    ─────────────────────────────────────── */
+    .chart-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      transition: all var(--transition-speed);
+      overflow: hidden;
+    }
+
+    .chart-container:hover {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 30px var(--glow-color);
+    }
+
+    #complexity-chart svg {
+      width: 100%;
+      height: auto;
+    }
+
+    /* Legend chips */
+    .legend-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      justify-content: center;
+    }
+
+    .legend-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: all 0.25s;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .legend-chip:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    /* ───────────────────────────────────────
+       Data Tables
+    ─────────────────────────────────────── */
+    .table-wrapper {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: all var(--transition-speed);
+    }
+
+    .table-wrapper:hover {
+      border-color: var(--accent-cyan);
+    }
+
+    .table-header {
+      background: var(--bg-secondary);
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .table-header h3 {
+      font-size: 1.1rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Responsive table container */
+    .table-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      min-width: 700px;
+    }
+
+    table.data-table thead th {
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.75rem 1rem;
+      border-bottom: 2px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      white-space: nowrap;
+    }
+
+    table.data-table tbody tr {
+      transition: background 0.2s;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    table.data-table tbody tr:hover {
+      background: var(--bg-card-hover);
+    }
+
+    table.data-table tbody td {
+      padding: 0.7rem 1rem;
+      white-space: nowrap;
+    }
+
+    table.data-table tbody td:first-child {
+      font-weight: 600;
+      color: var(--accent-cyan);
+    }
+
+    /* Complexity badges */
+    .badge-complexity {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: transform 0.2s;
+    }
+
+    .badge-complexity:hover {
+      transform: scale(1.08);
+    }
+
+    .badge-good {
+      background: var(--badge-good);
+      color: var(--accent-green);
+    }
+
+    .badge-fair {
+      background: var(--badge-fair);
+      color: var(--accent-yellow);
+    }
+
+    .badge-bad {
+      background: var(--badge-bad);
+      color: var(--accent-red);
+    }
+
+    .badge-orange {
+      background: rgba(249,115,22,0.15);
+      color: var(--accent-orange);
+    }
+
+    /* ───────────────────────────────────────
+       Filter Buttons
+    ─────────────────────────────────────── */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .btn-filter {
+      padding: 0.35rem 0.9rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: 'Lexend', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+
+    .btn-filter:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      transform: translateY(-1px);
+    }
+
+    .btn-filter.active {
+      background: var(--accent-cyan);
+      color: #fff;
+      border-color: var(--accent-cyan);
+    }
+
+    /* ───────────────────────────────────────
+       Tip Box (dyslexia-friendly)
+    ─────────────────────────────────────── */
+    .tip-box {
+      background: var(--glow-color);
+      border-left: 4px solid var(--accent-cyan);
+      border-radius: 0 12px 12px 0;
+      padding: 1.25rem 1.5rem;
+      margin: 2rem 0;
+      font-size: 0.95rem;
+      line-height: 1.8;
+    }
+
+    .tip-box strong {
+      color: var(--accent-cyan);
+      display: block;
+      margin-bottom: 0.3rem;
+      font-size: 0.9rem;
+      letter-spacing: 0.04em;
+    }
+
+    /* ───────────────────────────────────────
+       Footer
+    ─────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 2rem 0;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    footer a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    footer a:hover {
+      color: var(--accent-purple);
+    }
+
+    /* ───────────────────────────────────────
+       Mobile Overrides
+    ─────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .hero { padding: 4.5rem 0 2rem; }
+      .hero h1 { font-size: 1.8rem; }
+      section { padding: 2rem 0; }
+      .section-title { font-size: 1.3rem; }
+
+      .table-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .chart-container { padding: 1rem; }
+
+      /* Scroll hint for tables */
+      .table-scroll::after {
+        content: '← scroll →';
+        display: block;
+        text-align: center;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        padding: 0.5rem;
+      }
+    }
+
+    /* ───────────────────────────────────────
+       Button Pulse
+    ─────────────────────────────────────── */
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(6,182,212,0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(6,182,212,0); }
+      100% { box-shadow: 0 0 0 0 rgba(6,182,212,0); }
+    }
+
+    .pulse-btn {
+      animation: pulse 2.5s infinite;
+    }
+
+    /* Skip Link for accessibility */
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 1rem;
+      background: var(--accent-cyan);
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border-radius: 0 0 8px 8px;
+      z-index: 9999;
+      font-weight: 600;
+    }
+
+    .skip-link:focus {
+      top: 0;
+    }
+
+    /* D3 tooltip */
+    .d3-tooltip {
+      position: absolute;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.5rem 0.8rem;
+      font-size: 0.82rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-primary);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+      box-shadow: var(--shadow);
+      z-index: 100;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Accessibility skip link -->
+  <a href="#main-content" class="skip-link">Skip to content</a>
+
+  <!-- Animated background grid -->
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <!-- ═══════════════════════════════════
+       NAVBAR
+  ═══════════════════════════════════ -->
+  <nav class="navbar navbar-expand-lg navbar-custom fixed-top" role="navigation" aria-label="Main navigation">
+    <div class="container">
+      <a class="navbar-brand" href="#">&lt;BIG-O/&gt;</a>
+      <div class="d-flex align-items-center gap-2 order-lg-last">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light theme">
+          <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+        </button>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu"
+                aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      </div>
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav ms-auto me-3 gap-1">
+          <li class="nav-item"><a class="nav-link active" href="#chart">Complexity Chart</a></li>
+          <li class="nav-item"><a class="nav-link" href="#data-structures">Data Structures</a></li>
+          <li class="nav-item"><a class="nav-link" href="#sorting">Sorting Algorithms</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════
+       HERO
+  ═══════════════════════════════════ -->
+  <header class="hero" id="main-content">
+    <div class="container">
+      <h1 class="fade-up stagger-1">&lt; <span class="highlight">Big O</span> Cheatsheet /&gt;</h1>
+      <p class="fade-up stagger-2">
+        An interactive guide to time and space complexity.
+        Explore data structures and sorting algorithms
+        with live D3.js visualizations.
+      </p>
+      <a href="#chart" class="btn btn-outline-info rounded-pill px-4 py-2 fade-up stagger-3 pulse-btn">
+        <i class="bi bi-graph-up me-1"></i> Explore the Chart
+      </a>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════
+       COMPLEXITY CHART (D3.js)
+  ═══════════════════════════════════ -->
+  <section id="chart">
+    <div class="container">
+      <h2 class="section-title reveal"><i class="bi bi-bar-chart-line"></i> Complexity Growth Chart</h2>
+      <p class="section-subtitle reveal">
+        See how different Big O complexities scale
+        as the number of elements (n) increases.
+        Hover over any line for details.
+      </p>
+
+      <div class="chart-container reveal">
+        <div id="complexity-chart"></div>
+        <div class="legend-chips" id="chart-legend"></div>
+      </div>
+
+      <div class="tip-box reveal">
+        <strong><i class="bi bi-lightbulb"></i> Quick Tip</strong>
+        O(1) is constant time — the fastest.
+        O(n!) is factorial — it grows astronomically fast
+        and should be avoided for large inputs.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       DATA STRUCTURES TABLE
+  ═══════════════════════════════════ -->
+  <section id="data-structures">
+    <div class="container">
+      <h2 class="section-title reveal"><i class="bi bi-diagram-3"></i> Data Structure Operations</h2>
+      <p class="section-subtitle reveal">
+        Average and worst-case time complexity
+        for common data structure operations.
+      </p>
+
+      <div class="table-wrapper reveal">
+        <div class="table-header">
+          <h3><i class="bi bi-table"></i> Time &amp; Space Complexity</h3>
+          <div class="filter-bar" id="ds-filters">
+            <button class="btn-filter active" data-filter="all">All</button>
+            <button class="btn-filter" data-filter="linear">Linear</button>
+            <button class="btn-filter" data-filter="tree">Trees</button>
+            <button class="btn-filter" data-filter="hash">Hash</button>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table class="data-table" id="ds-table" aria-label="Data structure complexity comparison">
+            <thead>
+              <tr>
+                <th rowspan="2">Data Structure</th>
+                <th colspan="4" style="text-align:center; color:var(--accent-green);">Average Time</th>
+                <th colspan="4" style="text-align:center; color:var(--accent-red);">Worst Time</th>
+                <th style="text-align:center; color:var(--accent-purple);">Space (Worst)</th>
+              </tr>
+              <tr>
+                <th>Access</th><th>Search</th><th>Insert</th><th>Delete</th>
+                <th>Access</th><th>Search</th><th>Insert</th><th>Delete</th>
+                <th>Space</th>
+              </tr>
+            </thead>
+            <tbody id="ds-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       SORTING ALGORITHMS TABLE
+  ═══════════════════════════════════ -->
+  <section id="sorting">
+    <div class="container">
+      <h2 class="section-title reveal"><i class="bi bi-sort-down"></i> Array Sorting Algorithms</h2>
+      <p class="section-subtitle reveal">
+        Best, average, and worst-case complexity
+        for popular sorting algorithms.
+      </p>
+
+      <div class="table-wrapper reveal">
+        <div class="table-header">
+          <h3><i class="bi bi-table"></i> Sorting Complexity</h3>
+          <div class="filter-bar" id="sort-filters">
+            <button class="btn-filter active" data-filter="all">All</button>
+            <button class="btn-filter" data-filter="comparison">Comparison</button>
+            <button class="btn-filter" data-filter="non-comparison">Non-Comparison</button>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table class="data-table" id="sort-table" aria-label="Sorting algorithm complexity comparison">
+            <thead>
+              <tr>
+                <th>Algorithm</th>
+                <th style="color:var(--accent-green);">Best</th>
+                <th style="color:var(--accent-yellow);">Average</th>
+                <th style="color:var(--accent-red);">Worst</th>
+                <th style="color:var(--accent-purple);">Space (Worst)</th>
+              </tr>
+            </thead>
+            <tbody id="sort-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════ -->
+  <footer>
+    <div class="container">
+      <p>
+        Data sourced from
+        <a href="https://www.bigocheatsheet.com/" target="_blank" rel="noopener">bigocheatsheet.com</a>.
+        Built with
+        <a href="https://d3js.org/" target="_blank" rel="noopener">D3.js</a>,
+        <a href="https://getbootstrap.com/" target="_blank" rel="noopener">Bootstrap 5</a>,
+        and crafted for accessibility.
+      </p>
+      <p style="margin-top:0.5rem;">
+        &copy; 2026 George — BlerdalertsCS.
+        <a href="https://github.com/yourusername" target="_blank" rel="noopener">
+          <i class="bi bi-github"></i> GitHub
+        </a>
+      </p>
+    </div>
+  </footer>
+
+  <!-- D3 Tooltip -->
+  <div class="d3-tooltip" id="tooltip"></div>
+
+  <!-- ═══════════════════════════════════
+       SCRIPTS
+  ═══════════════════════════════════ -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+
+  <script>
+  /* ─────────────────────────────────────────────
+     DATA
+  ───────────────────────────────────────────── */
+  const dataStructures = [
+    { name:"Array",              cat:"linear", avgAccess:"Θ(1)",      avgSearch:"Θ(n)",      avgInsert:"Θ(n)",      avgDelete:"Θ(n)",      wAccess:"O(1)",      wSearch:"O(n)",      wInsert:"O(n)",      wDelete:"O(n)",      space:"O(n)" },
+    { name:"Stack",              cat:"linear", avgAccess:"Θ(n)",      avgSearch:"Θ(n)",      avgInsert:"Θ(1)",      avgDelete:"Θ(1)",      wAccess:"O(n)",      wSearch:"O(n)",      wInsert:"O(1)",      wDelete:"O(1)",      space:"O(n)" },
+    { name:"Queue",              cat:"linear", avgAccess:"Θ(n)",      avgSearch:"Θ(n)",      avgInsert:"Θ(1)",      avgDelete:"Θ(1)",      wAccess:"O(n)",      wSearch:"O(n)",      wInsert:"O(1)",      wDelete:"O(1)",      space:"O(n)" },
+    { name:"Singly-Linked List", cat:"linear", avgAccess:"Θ(n)",      avgSearch:"Θ(n)",      avgInsert:"Θ(1)",      avgDelete:"Θ(1)",      wAccess:"O(n)",      wSearch:"O(n)",      wInsert:"O(1)",      wDelete:"O(1)",      space:"O(n)" },
+    { name:"Doubly-Linked List", cat:"linear", avgAccess:"Θ(n)",      avgSearch:"Θ(n)",      avgInsert:"Θ(1)",      avgDelete:"Θ(1)",      wAccess:"O(n)",      wSearch:"O(n)",      wInsert:"O(1)",      wDelete:"O(1)",      space:"O(n)" },
+    { name:"Skip List",          cat:"linear", avgAccess:"Θ(log n)",  avgSearch:"Θ(log n)",  avgInsert:"Θ(log n)",  avgDelete:"Θ(log n)",  wAccess:"O(n)",      wSearch:"O(n)",      wInsert:"O(n)",      wDelete:"O(n)",      space:"O(n log n)" },
+    { name:"Hash Table",         cat:"hash",   avgAccess:"N/A",       avgSearch:"Θ(1)",      avgInsert:"Θ(1)",      avgDelete:"Θ(1)",      wAccess:"N/A",       wSearch:"O(n)",      wInsert:"O(n)",      wDelete:"O(n)",      space:"O(n)" },
+    { name:"BST",                cat:"tree",   avgAccess:"Θ(log n)",  avgSearch:"Θ(log n)",  avgInsert:"Θ(log n)",  avgDelete:"Θ(log n)",  wAccess:"O(n)",      wSearch:"O(n)",      wInsert:"O(n)",      wDelete:"O(n)",      space:"O(n)" },
+    { name:"Cartesian Tree",     cat:"tree",   avgAccess:"N/A",       avgSearch:"Θ(log n)",  avgInsert:"Θ(log n)",  avgDelete:"Θ(log n)",  wAccess:"N/A",       wSearch:"O(n)",      wInsert:"O(n)",      wDelete:"O(n)",      space:"O(n)" },
+    { name:"B-Tree",             cat:"tree",   avgAccess:"Θ(log n)",  avgSearch:"Θ(log n)",  avgInsert:"Θ(log n)",  avgDelete:"Θ(log n)",  wAccess:"O(log n)",  wSearch:"O(log n)",  wInsert:"O(log n)",  wDelete:"O(log n)",  space:"O(n)" },
+    { name:"Red-Black Tree",     cat:"tree",   avgAccess:"Θ(log n)",  avgSearch:"Θ(log n)",  avgInsert:"Θ(log n)",  avgDelete:"Θ(log n)",  wAccess:"O(log n)",  wSearch:"O(log n)",  wInsert:"O(log n)",  wDelete:"O(log n)",  space:"O(n)" },
+    { name:"Splay Tree",         cat:"tree",   avgAccess:"N/A",       avgSearch:"Θ(log n)",  avgInsert:"Θ(log n)",  avgDelete:"Θ(log n)",  wAccess:"N/A",       wSearch:"O(log n)",  wInsert:"O(log n)",  wDelete:"O(log n)",  space:"O(n)" },
+    { name:"AVL Tree",           cat:"tree",   avgAccess:"Θ(log n)",  avgSearch:"Θ(log n)",  avgInsert:"Θ(log n)",  avgDelete:"Θ(log n)",  wAccess:"O(log n)",  wSearch:"O(log n)",  wInsert:"O(log n)",  wDelete:"O(log n)",  space:"O(n)" },
+    { name:"KD Tree",            cat:"tree",   avgAccess:"Θ(log n)",  avgSearch:"Θ(log n)",  avgInsert:"Θ(log n)",  avgDelete:"Θ(log n)",  wAccess:"O(n)",      wSearch:"O(n)",      wInsert:"O(n)",      wDelete:"O(n)",      space:"O(n)" },
+  ];
+
+  const sortingAlgorithms = [
+    { name:"Quicksort",       cat:"comparison",     best:"Ω(n log n)",  avg:"Θ(n log n)",  worst:"O(n²)",            space:"O(log n)" },
+    { name:"Mergesort",       cat:"comparison",     best:"Ω(n log n)",  avg:"Θ(n log n)",  worst:"O(n log n)",       space:"O(n)" },
+    { name:"Timsort",         cat:"comparison",     best:"Ω(n)",        avg:"Θ(n log n)",  worst:"O(n log n)",       space:"O(n)" },
+    { name:"Heapsort",        cat:"comparison",     best:"Ω(n log n)",  avg:"Θ(n log n)",  worst:"O(n log n)",       space:"O(1)" },
+    { name:"Bubble Sort",     cat:"comparison",     best:"Ω(n)",        avg:"Θ(n²)",       worst:"O(n²)",            space:"O(1)" },
+    { name:"Insertion Sort",  cat:"comparison",     best:"Ω(n)",        avg:"Θ(n²)",       worst:"O(n²)",            space:"O(1)" },
+    { name:"Selection Sort",  cat:"comparison",     best:"Ω(n²)",       avg:"Θ(n²)",       worst:"O(n²)",            space:"O(1)" },
+    { name:"Tree Sort",       cat:"comparison",     best:"Ω(n log n)",  avg:"Θ(n log n)",  worst:"O(n²)",            space:"O(n)" },
+    { name:"Shell Sort",      cat:"comparison",     best:"Ω(n log n)",  avg:"Θ(n(log n)²)",worst:"O(n(log n)²)",     space:"O(1)" },
+    { name:"Bucket Sort",     cat:"non-comparison", best:"Ω(n+k)",      avg:"Θ(n+k)",      worst:"O(n²)",            space:"O(n)" },
+    { name:"Radix Sort",      cat:"non-comparison", best:"Ω(nk)",       avg:"Θ(nk)",       worst:"O(nk)",            space:"O(n+k)" },
+    { name:"Counting Sort",   cat:"non-comparison", best:"Ω(n+k)",      avg:"Θ(n+k)",      worst:"O(n+k)",           space:"O(k)" },
+    { name:"Cubesort",        cat:"comparison",     best:"Ω(n)",        avg:"Θ(n log n)",  worst:"O(n log n)",       space:"O(n)" },
+  ];
+
+  /* ─────────────────────────────────────────────
+     COMPLEXITY BADGE HELPER
+  ───────────────────────────────────────────── */
+  function getBadgeClass(val) {
+    if (!val || val === "N/A") return "";
+    const v = val.toLowerCase();
+    if (v.includes("1)") || v.includes("log n)")) return "badge-good";
+    if (v.includes("n)") && !v.includes("n²") && !v.includes("n log") && !v.includes("nk")) return "badge-fair";
+    if (v.includes("n log") || v.includes("n+k") || v.includes("nk")) return "badge-fair";
+    return "badge-bad";
+  }
+
+  function badge(text) {
+    if (!text || text === "N/A") return `<span class="badge-complexity" style="color:var(--text-muted)">N/A</span>`;
+    return `<span class="badge-complexity ${getBadgeClass(text)}">${text}</span>`;
+  }
+
+  /* ─────────────────────────────────────────────
+     RENDER DATA STRUCTURES TABLE
+  ───────────────────────────────────────────── */
+  function renderDSTable(filter = "all") {
+    const tbody = document.getElementById("ds-tbody");
+    const filtered = filter === "all" ? dataStructures : dataStructures.filter(d => d.cat === filter);
+
+    tbody.innerHTML = filtered.map((d, i) => `
+      <tr style="animation: fadeUp 0.4s ease ${i * 0.04}s both">
+        <td>${d.name}</td>
+        <td>${badge(d.avgAccess)}</td><td>${badge(d.avgSearch)}</td>
+        <td>${badge(d.avgInsert)}</td><td>${badge(d.avgDelete)}</td>
+        <td>${badge(d.wAccess)}</td><td>${badge(d.wSearch)}</td>
+        <td>${badge(d.wInsert)}</td><td>${badge(d.wDelete)}</td>
+        <td>${badge(d.space)}</td>
+      </tr>
+    `).join("");
+  }
+
+  /* ─────────────────────────────────────────────
+     RENDER SORTING TABLE
+  ───────────────────────────────────────────── */
+  function renderSortTable(filter = "all") {
+    const tbody = document.getElementById("sort-tbody");
+    const filtered = filter === "all" ? sortingAlgorithms : sortingAlgorithms.filter(d => d.cat === filter);
+
+    tbody.innerHTML = filtered.map((d, i) => `
+      <tr style="animation: fadeUp 0.4s ease ${i * 0.04}s both">
+        <td>${d.name}</td>
+        <td>${badge(d.best)}</td>
+        <td>${badge(d.avg)}</td>
+        <td>${badge(d.worst)}</td>
+        <td>${badge(d.space)}</td>
+      </tr>
+    `).join("");
+  }
+
+  /* ─────────────────────────────────────────────
+     FILTER BUTTONS
+  ───────────────────────────────────────────── */
+  document.getElementById("ds-filters").addEventListener("click", e => {
+    if (!e.target.classList.contains("btn-filter")) return;
+    e.target.parentElement.querySelectorAll(".btn-filter").forEach(b => b.classList.remove("active"));
+    e.target.classList.add("active");
+    renderDSTable(e.target.dataset.filter);
+  });
+
+  document.getElementById("sort-filters").addEventListener("click", e => {
+    if (!e.target.classList.contains("btn-filter")) return;
+    e.target.parentElement.querySelectorAll(".btn-filter").forEach(b => b.classList.remove("active"));
+    e.target.classList.add("active");
+    renderSortTable(e.target.dataset.filter);
+  });
+
+  // Initial render
+  renderDSTable();
+  renderSortTable();
+
+  /* ─────────────────────────────────────────────
+     D3.js COMPLEXITY GROWTH CHART
+  ───────────────────────────────────────────── */
+  function drawChart() {
+    const container = document.getElementById("complexity-chart");
+    container.innerHTML = "";
+
+    const margin = { top: 30, right: 30, bottom: 50, left: 60 };
+    const fullW = container.clientWidth;
+    const fullH = Math.min(420, fullW * 0.55);
+    const w = fullW - margin.left - margin.right;
+    const h = fullH - margin.top - margin.bottom;
+
+    const svg = d3.select(container)
+      .append("svg")
+      .attr("viewBox", `0 0 ${fullW} ${fullH}`)
+      .attr("preserveAspectRatio", "xMidYMid meet")
+      .attr("role", "img")
+      .attr("aria-label", "Big O complexity growth chart");
+
+    const g = svg.append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    const N = 30;
+    const nValues = d3.range(1, N + 1);
+
+    // Complexity functions
+    const complexities = [
+      { label: "O(1)",       fn: () => 1,                    color: "#22c55e" },
+      { label: "O(log n)",   fn: n => Math.log2(n),          color: "#06b6d4" },
+      { label: "O(n)",       fn: n => n,                     color: "#3b82f6" },
+      { label: "O(n log n)", fn: n => n * Math.log2(n),      color: "#eab308" },
+      { label: "O(n²)",      fn: n => n * n,                 color: "#f97316" },
+      { label: "O(2ⁿ)",     fn: n => Math.pow(2, n),        color: "#ef4444" },
+    ];
+
+    const maxY = N * N; // cap at n²
+    const x = d3.scaleLinear().domain([1, N]).range([0, w]);
+    const y = d3.scaleLinear().domain([0, maxY]).range([h, 0]).clamp(true);
+
+    // Grid
+    const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--chart-grid').trim();
+
+    g.append("g").attr("class", "grid-y")
+      .selectAll("line")
+      .data(y.ticks(5))
+      .join("line")
+        .attr("x1", 0).attr("x2", w)
+        .attr("y1", d => y(d)).attr("y2", d => y(d))
+        .attr("stroke", gridColor).attr("stroke-dasharray", "3,3").attr("opacity", 0.5);
+
+    // Axes
+    const axisColor = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim();
+
+    g.append("g").attr("transform", `translate(0,${h})`)
+      .call(d3.axisBottom(x).ticks(6).tickFormat(d => d))
+      .call(g => g.selectAll("text").attr("fill", axisColor).style("font-size", "0.75rem"))
+      .call(g => g.selectAll("line,path").attr("stroke", axisColor));
+
+    g.append("g")
+      .call(d3.axisLeft(y).ticks(5).tickFormat(d => d >= 1000 ? `${d/1000}k` : d))
+      .call(g => g.selectAll("text").attr("fill", axisColor).style("font-size", "0.75rem"))
+      .call(g => g.selectAll("line,path").attr("stroke", axisColor));
+
+    // Axis labels
+    svg.append("text")
+      .attr("x", fullW / 2).attr("y", fullH - 6)
+      .attr("text-anchor", "middle")
+      .attr("fill", axisColor)
+      .style("font-size", "0.8rem").style("font-family", "Lexend, sans-serif")
+      .text("Elements (n)");
+
+    svg.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("x", -fullH / 2).attr("y", 16)
+      .attr("text-anchor", "middle")
+      .attr("fill", axisColor)
+      .style("font-size", "0.8rem").style("font-family", "Lexend, sans-serif")
+      .text("Operations");
+
+    // D3 line generator
+    const line = d3.line()
+      .x(d => x(d.n))
+      .y(d => y(d.v))
+      .curve(d3.curveCatmullRom);
+
+    const tooltip = document.getElementById("tooltip");
+
+    // Draw lines with animation
+    complexities.forEach((c, idx) => {
+      const data = nValues.map(n => ({ n, v: c.fn(n) }));
+
+      const path = g.append("path")
+        .datum(data)
+        .attr("fill", "none")
+        .attr("stroke", c.color)
+        .attr("stroke-width", 2.5)
+        .attr("opacity", 0.9)
+        .attr("d", line);
+
+      // Animate line drawing
+      const totalLength = path.node().getTotalLength();
+      path
+        .attr("stroke-dasharray", `${totalLength} ${totalLength}`)
+        .attr("stroke-dashoffset", totalLength)
+        .transition()
+        .delay(idx * 200)
+        .duration(1200)
+        .ease(d3.easeCubicInOut)
+        .attr("stroke-dashoffset", 0);
+
+      // Invisible wider line for hover
+      g.append("path")
+        .datum(data)
+        .attr("fill", "none")
+        .attr("stroke", "transparent")
+        .attr("stroke-width", 14)
+        .attr("d", line)
+        .style("cursor", "pointer")
+        .on("mousemove", (event) => {
+          const [mx] = d3.pointer(event);
+          const nVal = Math.round(x.invert(mx));
+          const clamped = Math.max(1, Math.min(N, nVal));
+          const ops = c.fn(clamped);
+          tooltip.innerHTML = `<strong>${c.label}</strong><br/>n=${clamped} → ${ops >= 1e6 ? ops.toExponential(1) : Math.round(ops)} ops`;
+          tooltip.style.opacity = 1;
+          tooltip.style.left = event.pageX + 14 + "px";
+          tooltip.style.top = event.pageY - 40 + "px";
+          tooltip.style.borderColor = c.color;
+        })
+        .on("mouseleave", () => { tooltip.style.opacity = 0; });
+    });
+
+    // Legend
+    const legendContainer = document.getElementById("chart-legend");
+    legendContainer.innerHTML = complexities.map(c =>
+      `<span class="legend-chip">
+        <span class="legend-dot" style="background:${c.color}"></span>
+        ${c.label}
+      </span>`
+    ).join("");
+  }
+
+  drawChart();
+  window.addEventListener("resize", d3.debounce ? drawChart : debounce(drawChart, 250));
+
+  // Simple debounce
+  function debounce(fn, ms) {
+    let t;
+    return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+  }
+
+  /* ─────────────────────────────────────────────
+     DARK / LIGHT THEME TOGGLE
+  ───────────────────────────────────────────── */
+  const themeToggle = document.getElementById("themeToggle");
+  const themeIcon = document.getElementById("themeIcon");
+  const html = document.documentElement;
+
+  // Check saved preference
+  const saved = localStorage.getItem("bigo-theme");
+  if (saved) {
+    html.setAttribute("data-theme", saved);
+    themeIcon.className = saved === "dark" ? "bi bi-moon-stars-fill" : "bi bi-sun-fill";
+  }
+
+  themeToggle.addEventListener("click", () => {
+    const current = html.getAttribute("data-theme");
+    const next = current === "dark" ? "light" : "dark";
+    html.setAttribute("data-theme", next);
+    themeIcon.className = next === "dark" ? "bi bi-moon-stars-fill" : "bi bi-sun-fill";
+    localStorage.setItem("bigo-theme", next);
+    // Redraw chart for updated CSS colors
+    setTimeout(drawChart, 100);
+  });
+
+  /* ─────────────────────────────────────────────
+     SCROLL-REVEAL ANIMATION
+  ───────────────────────────────────────────── */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("visible");
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
+
+  /* ─────────────────────────────────────────────
+     ACTIVE NAV LINK ON SCROLL
+  ───────────────────────────────────────────── */
+  const sections = document.querySelectorAll("section[id]");
+  const navLinks = document.querySelectorAll(".nav-link");
+
+  window.addEventListener("scroll", () => {
+    let current = "";
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 120) current = s.id;
+    });
+    navLinks.forEach(link => {
+      link.classList.toggle("active", link.getAttribute("href") === "#" + current);
+    });
+  });
+  </script>
+</body>
+</html>
